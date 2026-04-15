@@ -4,7 +4,11 @@ import OpenAI from "openai";
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getOpenAI() {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
 const SYSTEM_PROMPT = `You are an enterprise risk analyst AI. Given a company name and a risk topic, generate a complete risk simulation dataset. You must return ONLY valid JSON (no markdown, no code fences) matching the exact schema below.
 
@@ -151,7 +155,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.7,
       max_tokens: 8000,
